@@ -12,6 +12,12 @@ const FINISH_NODE_COL = 45;
 export const PathfindingVisualizer = () => {
     const [grid, setGrid] = useState(() => getInitialGrid());
     const [mouseIsPressed, setMouseIsPressed] = useState(false);
+    const [startNodeRow, setStartNodeRow] = useState(START_NODE_ROW);
+    const [startNodeCol, setStartNodeCol] = useState(START_NODE_COL);
+    const [finishNodeRow, setFinishNodeRow] = useState(FINISH_NODE_ROW);
+    const [finishNodeCol, setFinishNodeCol] = useState(FINISH_NODE_COL);
+    const [isDraggingStartNode, setIsDraggingStartNode] = useState(false);
+    const [isDraggingFinishNode, setIsDraggingFinishNode] = useState(false);
 
     useEffect(() => {
         const initialGrid = getInitialGrid();
@@ -19,18 +25,44 @@ export const PathfindingVisualizer = () => {
     },[])
 
     const handleMouseDown = (row, col) => {
-        const newGrid = getNewGridWithWallToggled(grid, row, col);
-        setGrid(newGrid);
-        setMouseIsPressed(true);
+        if (row === startNodeRow && col === startNodeCol) {
+            setIsDraggingStartNode(true);
+        } else if (row === finishNodeRow && col === finishNodeCol) {
+            setIsDraggingFinishNode(true);
+        } else {
+            const newGrid = getNewGridWithWallToggled(grid, row, col);
+            setGrid(newGrid);
+            setMouseIsPressed(true);
+        }
     }
     const handleMouseEnter = (row, col) => {
         if (!mouseIsPressed) return;
-        const newGrid = getNewGridWithWallToggled(grid, row, col);
-        setGrid(newGrid);
+        if (isDraggingStartNode) {
+            const newGrid = grid.slice();
+            const oldStartNode = newGrid[startNodeRow][startNodeCol];
+            const newStartNode = newGrid[row][col];
+            oldStartNode.isStart = !oldStartNode.isStart;
+            oldStartNode.className = 'node';
+            newStartNode.isStart = !newStartNode.isStart;
+            newStartNode.className = 'node node-start';
+            setStartNodeRow(row);
+            setStartNodeCol(col);
+            setGrid(newGrid);
+            
+        } else if (isDraggingFinishNode) {
+            setFinishNodeRow(row);
+            setFinishNodeCol(col);
+        } 
+        else {
+            const newGrid = getNewGridWithWallToggled(grid, row, col);
+            setGrid(newGrid);
+        }
     }
-
     const handleMouseUp = () => {
-        setMouseIsPressed(false);   
+        setMouseIsPressed(false);         
+        setIsDraggingStartNode(false);
+        setIsDraggingFinishNode(false);
+        
     }
 
     const animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
@@ -64,17 +96,40 @@ export const PathfindingVisualizer = () => {
     };
 
     const visualizeDijkstra = () => {
-        const startNode = grid[START_NODE_ROW][START_NODE_COL];
-        const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
+        const startNode = grid[startNodeRow][startNodeCol];
+        const finishNode = grid[finishNodeRow][finishNodeCol];
         const visitedNodesInOrder = dijkstra(grid, startNode, finishNode);
         const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
         animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder);
     };
 
+    const resetGrid = () => {
+        const initialGrid = getInitialGrid();
+        for (let i = 0; i < initialGrid.length; i++) {
+            for (let j = 0; j < initialGrid[0].length; j++) {
+                const node = initialGrid[i][j];
+                const nodeElement = document.getElementById(`node-${node.row}-${node.col}`);
+                nodeElement.classList.remove('node-visited');
+                nodeElement.classList.remove('node-shortest-path');
+                if (node.isStart) {
+                    nodeElement.classList.add('node-start');
+                }
+                if (node.isFinish) {
+                    nodeElement.classList.add('node-finish');
+                }
+            }
+        }
+        setGrid(initialGrid);
+        setMouseIsPressed(false);
+    }
+
     return (
         <>
             <button onClick={visualizeDijkstra}>
                 Visualize Dijkstra's Algorithm
+            </button>
+            <button onClick={resetGrid}>
+                Reset
             </button>
             <div className="grid">
                 {grid.map((row, index) => {
@@ -142,3 +197,4 @@ const getNewGridWithWallToggled = (grid, row, col) => {
     newGrid[row][col] = newNode;
     return newGrid;
 }
+

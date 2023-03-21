@@ -1,13 +1,9 @@
-// Performs Dijkstra's algorithm; returns *all* nodes in the order
-// in which they were visited. Also makes nodes point back to their
-// previous node, effectively allowing us to compute the shortest path
-// by backtracking from the finish node.
-export function dijkstra(grid, startNode, finishNode) {
+export function greedyBestFirstSearch(grid, startNode, finishNode) {
     const visitedNodesInOrder = [];
     startNode.distance = 0;
     const unvisitedNodes = getAllNodes(grid);
     while (!!unvisitedNodes.length) {
-      unvisitedNodes.sort((nodeA, nodeB) => nodeA.distance - nodeB.distance);
+      unvisitedNodes.sort((nodeA, nodeB) => heuristic(nodeA, finishNode) - heuristic(nodeB, finishNode));
       const closestNode = unvisitedNodes.shift();
       // If we encounter a wall, we skip it.
       if (closestNode.isWall) continue;
@@ -17,19 +13,19 @@ export function dijkstra(grid, startNode, finishNode) {
       closestNode.isVisited = true;
       visitedNodesInOrder.push(closestNode);
       if (closestNode === finishNode) return visitedNodesInOrder;
-      updateUnvisitedNeighbors(closestNode, grid);
+      updateUnvisitedNeighbors(closestNode, finishNode, grid);
     }
-  }
+}
   
-  function updateUnvisitedNeighbors(node, grid) {
+function updateUnvisitedNeighbors(node, finishNode, grid) {
     const unvisitedNeighbors = getUnvisitedNeighbors(node, grid);
     for (const neighbor of unvisitedNeighbors) {
-      neighbor.distance = node.distance + 1;
+      neighbor.distance = heuristic(neighbor, finishNode);
       neighbor.previousNode = node;
     }
-  }
+}
   
-  function getUnvisitedNeighbors(node, grid) {
+function getUnvisitedNeighbors(node, grid) {
     const neighbors = [];
     const {col, row} = node;
     if (row > 0) neighbors.push(grid[row - 1][col]);
@@ -37,9 +33,9 @@ export function dijkstra(grid, startNode, finishNode) {
     if (col > 0) neighbors.push(grid[row][col - 1]);
     if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
     return neighbors.filter(neighbor => !neighbor.isVisited);
-  }
+}
   
-  function getAllNodes(grid) {
+function getAllNodes(grid) {
     const nodes = [];
     for (const row of grid) {
       for (const node of row) {
@@ -47,11 +43,17 @@ export function dijkstra(grid, startNode, finishNode) {
       }
     }
     return nodes;
-  }
+}
+  
+function heuristic(nodeA, nodeB) {
+    const dx = Math.abs(nodeA.col - nodeB.col);
+    const dy = Math.abs(nodeA.row - nodeB.row);
+    return Math.sqrt(dx * dx + dy * dy);
+}
   
   // Backtracks from the finishNode to find the shortest path.
-  // Only works when called *after* the dijkstra method above.
-  export function getNodesInShortestPathOrder(finishNode) {
+  // Only works when called *after* the greedyBestFirstSearch method above.
+export function getNodesInShortestPathOrder(finishNode) {
     const nodesInShortestPathOrder = [];
     let currentNode = finishNode;
     while (currentNode !== null) {
@@ -59,5 +61,5 @@ export function dijkstra(grid, startNode, finishNode) {
       currentNode = currentNode.previousNode;
     }
     return nodesInShortestPathOrder;
-  }
+}
   
