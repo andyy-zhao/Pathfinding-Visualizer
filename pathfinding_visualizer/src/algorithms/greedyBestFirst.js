@@ -3,7 +3,8 @@ export function greedyBestFirstSearch(grid, startNode, finishNode) {
     startNode.distance = 0;
     const unvisitedNodes = getAllNodes(grid);
     while (!!unvisitedNodes.length) {
-      unvisitedNodes.sort((nodeA, nodeB) => heuristic(nodeA, finishNode) - heuristic(nodeB, finishNode));
+      unvisitedNodes.sort((nodeA, nodeB) => nodeA.distance - nodeB.distance);
+      console.log(unvisitedNodes[3])
       const closestNode = unvisitedNodes.shift();
       // If we encounter a wall, we skip it.
       if (closestNode.isWall) continue;
@@ -53,13 +54,14 @@ function heuristic(nodeA, nodeB) {
   
   // Backtracks from the finishNode to find the shortest path.
   // Only works when called *after* the greedyBestFirstSearch method above.
-export function getNodesInShortestPathOrder(finishNode) {
+export function getNodesInShortestPathOrderGreedy(finishNode) {
     const nodesInShortestPathOrder = [];
     let currentNode = finishNode;
     while (currentNode !== null) {
       nodesInShortestPathOrder.unshift(currentNode);
       currentNode = currentNode.previousNode;
     }
+    console.log(nodesInShortestPathOrder);
     return nodesInShortestPathOrder;
 }
   
