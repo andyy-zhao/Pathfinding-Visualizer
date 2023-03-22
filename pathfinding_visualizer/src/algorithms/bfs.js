@@ -37,6 +37,7 @@ export function breadthFirstSearch(grid, startNode, finishNode) {
       }
       explore(node, queue);
     }
+    return visitedNodesInOrder;
 }
   
 // Backtracks from the finishNode to find the shortest path.
@@ -46,7 +47,11 @@ export function getNodesInShortestPathOrderBFS(finishNode) {
     let currentNode = finishNode;
     while (currentNode !== null) {
       nodesInShortestPathOrder.unshift(currentNode);
-      currentNode = currentNode.parent;
+      if (currentNode.parent) {
+        currentNode = currentNode.parent;
+      } else {
+        return nodesInShortestPathOrder;
+      }
     }
     return nodesInShortestPathOrder;
 }

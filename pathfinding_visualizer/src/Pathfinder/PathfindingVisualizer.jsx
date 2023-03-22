@@ -29,42 +29,93 @@ export const PathfindingVisualizer = () => {
     const handleMouseDown = (row, col) => {
         if (row === startNodeRow && col === startNodeCol) {
             setIsDraggingStartNode(true);
-        } else if (row === finishNodeRow && col === finishNodeCol) {
-            setIsDraggingFinishNode(true);
-        } else {
-            const newGrid = getNewGridWithWallToggled(grid, row, col);
+            const newGrid = getNewGridWithStartNodeUpdated(grid, row, col);
             setGrid(newGrid);
             setMouseIsPressed(true);
+            return;
         }
+        else if (row === finishNodeRow && col === finishNodeCol) {
+            setIsDraggingFinishNode(true);
+            const newGrid = getNewGridWithFinishNodeUpdated(grid, row, col);
+            setGrid(newGrid);
+            setMouseIsPressed(true);
+            return;
+        }
+        const newGrid = getNewGridWithWallToggled(grid, row, col);
+        setGrid(newGrid);
+        setMouseIsPressed(true);
+        
     }
     const handleMouseEnter = (row, col) => {
         if (!mouseIsPressed) return;
         if (isDraggingStartNode) {
-            const newGrid = grid.slice();
-            const oldStartNode = newGrid[startNodeRow][startNodeCol];
-            const newStartNode = newGrid[row][col];
-            oldStartNode.isStart = !oldStartNode.isStart;
-            oldStartNode.className = 'node';
-            newStartNode.isStart = !newStartNode.isStart;
-            newStartNode.className = 'node node-start';
-            setStartNodeRow(row);
+            if (row === finishNodeRow && col === finishNodeCol) {
+                return;
+            }
             setStartNodeCol(col);
+            setStartNodeRow(row);
+            const newGrid = getNewGridWithStartNodeUpdated(grid, row, col);
             setGrid(newGrid);
-            
-        } else if (isDraggingFinishNode) {
-            setFinishNodeRow(row);
-            setFinishNodeCol(col);
-        } 
-        else {
-            const newGrid = getNewGridWithWallToggled(grid, row, col);
-            setGrid(newGrid);
+            return;
         }
+        if (isDraggingFinishNode) {
+            if (row === startNodeRow && col === startNodeCol) {
+                return;
+            }
+            setFinishNodeCol(col);
+            setFinishNodeRow(row);
+            const newGrid = getNewGridWithFinishNodeUpdated(grid, row, col);
+            setGrid(newGrid);
+            return;
+        }
+        const newGrid = getNewGridWithWallToggled(grid, row, col);
+        setGrid(newGrid);
     }
+
     const handleMouseUp = () => {
         setMouseIsPressed(false);         
-        setIsDraggingStartNode(false);
-        setIsDraggingFinishNode(false);
+        if (isDraggingStartNode) {
+            setIsDraggingStartNode(false);
+        }
+        if (isDraggingFinishNode) {
+            setIsDraggingFinishNode(false);
+        }
         
+    }
+    const getNewGridWithStartNodeUpdated = (grid, row, col) => {
+        const newGrid = grid.slice();
+        const startNode = newGrid[row][col];
+        const newStartNode = {
+            ...startNode, 
+            isStart: true,
+        };
+        newGrid[row][col] = newStartNode;
+        for (let i = 0; i < newGrid.length; i++) {
+            for (let j = 0; j < newGrid[i].length; j++) {
+                if (i !== row || j !== col) {
+                    newGrid[i][j].isStart = false;
+                }
+            }
+        }
+        return newGrid;
+    }
+
+    const getNewGridWithFinishNodeUpdated = (grid, row, col) => {
+        const newGrid = grid.slice();
+        const finishNode = newGrid[row][col];
+        const newFinishNode = {
+            ...finishNode, 
+            isFinish: true,
+        };
+        newGrid[row][col] = newFinishNode;
+        for (let i = 0; i < newGrid.length; i++) {
+            for (let j = 0; j < newGrid[i].length; j++) {
+                if (i !== row || j !== col) {
+                    newGrid[i][j].isFinish = false;
+                }
+            }
+        }
+        return newGrid;
     }
 
     const animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
@@ -139,6 +190,10 @@ export const PathfindingVisualizer = () => {
         }
         setGrid(initialGrid);
         setMouseIsPressed(false);
+        setStartNodeRow(START_NODE_ROW);
+        setStartNodeCol(START_NODE_COL);
+        setFinishNodeRow(FINISH_NODE_ROW);
+        setFinishNodeCol(FINISH_NODE_COL);
     }
 
     return (

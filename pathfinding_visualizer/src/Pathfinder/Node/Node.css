@@ -3,15 +3,34 @@
     height: 25px;
     outline: 1px solid rgb(175, 216, 248);
     display: inline-block;
+    margin-top: -1.5px;
   }
-  
+
+  .start-icon {
+    height: 20px;
+    margin-top: 5px;
+    pointer-events: none;
+    transform: translateY(-3px);
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .finish-icon {
+    height: 25px;
+    pointer-events: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+/*   
   .node-finish {
     background-color: red;
   }
   
   .node-start {
     background-color: green;
-  }
+  } */
   
   .node-visited {
     animation-name: visitedAnimation;
