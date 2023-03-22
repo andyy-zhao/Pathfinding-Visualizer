@@ -2,6 +2,7 @@ import { Node } from './Node/Node';
 import { useState, useEffect } from 'react';
 import { dijkstra, getNodesInShortestPathOrder } from '../algorithms/dijkstra';
 import { greedyBestFirstSearch, getNodesInShortestPathOrderGreedy } from '../algorithms/greedyBestFirst';
+import { breadthFirstSearch, getNodesInShortestPathOrderBFS } from '../algorithms/bfs';
 
 import './PathfindingVisualizer.css';
 
@@ -112,6 +113,14 @@ export const PathfindingVisualizer = () => {
         animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrderGreedy);
     };
 
+    const visualizeBFS = () => {
+        const startNode = grid[startNodeRow][startNodeCol];
+        const finishNode = grid[finishNodeRow][finishNodeCol];
+        const visitedNodesInOrder = breadthFirstSearch(grid, startNode, finishNode);
+        const nodesInShortestPathOrderBFS = getNodesInShortestPathOrderBFS(finishNode);
+        animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrderBFS);
+    };
+
     const resetGrid = () => {
         const initialGrid = getInitialGrid();
         for (let i = 0; i < initialGrid.length; i++) {
@@ -139,6 +148,9 @@ export const PathfindingVisualizer = () => {
             </button>
             <button onClick={visualizeGreedyBestFirst}>
                 Visualize Greedy Best First Algorithm
+            </button>
+            <button onClick={visualizeBFS}>
+                Visualize Breadth First Search Algorithm
             </button>
             <button onClick={resetGrid}>
                 Reset
