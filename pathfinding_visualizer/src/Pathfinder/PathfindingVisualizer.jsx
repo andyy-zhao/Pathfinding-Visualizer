@@ -3,16 +3,17 @@ import { useState, useEffect } from 'react';
 import { dijkstra, getNodesInShortestPathOrder } from '../algorithms/dijkstra';
 import { greedyBestFirstSearch, getNodesInShortestPathOrderGreedy } from '../algorithms/greedyBestFirst';
 import { breadthFirstSearch, getNodesInShortestPathOrderBFS } from '../algorithms/bfs';
+import { bellmanFord, getNodesInShortestPathOrderBellmanFord } from '../algorithms/bellmanFord';
 
 import './PathfindingVisualizer.css';
 
-const START_NODE_ROW = 10;
+const START_NODE_ROW = 12;
 const START_NODE_COL = 5;
-const FINISH_NODE_ROW = 10;
+const FINISH_NODE_ROW = 12;
 const FINISH_NODE_COL = 45;
 
 export const PathfindingVisualizer = () => {
-    const [grid, setGrid] = useState(() => getInitialGrid());
+    const [grid, setGrid] = useState(() => getInitialGrid(false));
     const [mouseIsPressed, setMouseIsPressed] = useState(false);
     const [startNodeRow, setStartNodeRow] = useState(START_NODE_ROW);
     const [startNodeCol, setStartNodeCol] = useState(START_NODE_COL);
@@ -20,11 +21,13 @@ export const PathfindingVisualizer = () => {
     const [finishNodeCol, setFinishNodeCol] = useState(FINISH_NODE_COL);
     const [isDraggingStartNode, setIsDraggingStartNode] = useState(false);
     const [isDraggingFinishNode, setIsDraggingFinishNode] = useState(false);
+    const [randomMazeBtnClick, setRandomMazeBtnClick] = useState(false);
 
     useEffect(() => {
-        const initialGrid = getInitialGrid();
+        const initialGrid = getInitialGrid(randomMazeBtnClick);
         setGrid(initialGrid);
-    },[])
+    },[randomMazeBtnClick])
+
 
     const handleMouseDown = (row, col) => {
         if (row === startNodeRow && col === startNodeCol) {
@@ -80,7 +83,6 @@ export const PathfindingVisualizer = () => {
         if (isDraggingFinishNode) {
             setIsDraggingFinishNode(false);
         }
-        
     }
     const getNewGridWithStartNodeUpdated = (grid, row, col) => {
         const newGrid = grid.slice();
@@ -115,6 +117,7 @@ export const PathfindingVisualizer = () => {
                 }
             }
         }
+        newGrid[row][col].isWall = false;
         return newGrid;
     }
 
@@ -172,8 +175,42 @@ export const PathfindingVisualizer = () => {
         animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrderBFS);
     };
 
+    const visualizeBellmanFord = () => {
+        const startNode = grid[startNodeRow][startNodeCol];
+        const finishNode = grid[finishNodeRow][finishNodeCol];
+        const visitedNodesInOrder = bellmanFord(grid, startNode, finishNode);
+        const nodesInShortestPathOrderBFS = getNodesInShortestPathOrderBellmanFord(finishNode);
+        animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrderBFS);
+    };
+    
+    const getRandomMaze = () => {
+        setRandomMazeBtnClick(true);
+        const initialGrid = getInitialGrid(randomMazeBtnClick);
+        for (let i = 0; i < initialGrid.length; i++) {
+            for (let j = 0; j < initialGrid[0].length; j++) {
+                const node = initialGrid[i][j];
+                const nodeElement = document.getElementById(`node-${node.row}-${node.col}`);
+                nodeElement.classList.remove('node-visited');
+                nodeElement.classList.remove('node-shortest-path');
+                if (node.isStart) {
+                    nodeElement.classList.add('node-start');
+                }
+                if (node.isFinish) {
+                    nodeElement.classList.add('node-finish');
+                }
+            }
+        }
+        setGrid(initialGrid);
+        setMouseIsPressed(false);
+        setStartNodeRow(START_NODE_ROW);
+        setStartNodeCol(START_NODE_COL);
+        setFinishNodeRow(FINISH_NODE_ROW);
+        setFinishNodeCol(FINISH_NODE_COL);
+    }
+
     const resetGrid = () => {
-        const initialGrid = getInitialGrid();
+        setRandomMazeBtnClick(false);
+        const initialGrid = getInitialGrid(randomMazeBtnClick);
         for (let i = 0; i < initialGrid.length; i++) {
             for (let j = 0; j < initialGrid[0].length; j++) {
                 const node = initialGrid[i][j];
@@ -207,8 +244,14 @@ export const PathfindingVisualizer = () => {
             <button onClick={visualizeBFS}>
                 Visualize Breadth First Search Algorithm
             </button>
+            <button onClick={visualizeBellmanFord}>
+                Visualize DP Bellman Ford Search Algorithm
+            </button>
             <button onClick={resetGrid}>
                 Reset
+            </button>
+            <button onClick={getRandomMaze}>
+                Random Maze
             </button>
             <div className="grid">
                 {grid.map((row, index) => {
@@ -239,18 +282,24 @@ export const PathfindingVisualizer = () => {
     )
 }
 
-const getInitialGrid = () => {
+const getInitialGrid = (randomMazeBtnClick) => {
     const grid = [];
-    for (let row = 0; row < 20; row++) {
+    for (let row = 0; row < 24; row++) {
       const currentRow = [];
       for (let col = 0; col < 50; col++) {
         currentRow.push(createNode(col, row));
       }
       grid.push(currentRow);
     }
+    if (randomMazeBtnClick) {
+        for (const row of grid) {
+            for (const node of row) {
+                node.isWall = Math.random() < 0.3;
+            }
+        }
+    }
     return grid;
 };
-  
 
 const createNode = (col, row) => {
     return {
