@@ -20,3 +20,11 @@ This application supports the following algorithms:
 * CSS
 * JavaScript
 * ReactJS
+
+## Features
+1. Left click on grid to create walls.
+2. Left click on wall to destroy it
+3. Drag and drop start and finish nodes on any node in the grid
+4. Random Maze button generates a random maze
+5. Reset button resets the grid to the initial state
+6. If no shortest path is found, only the finish node will be highlighted
