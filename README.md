@@ -7,6 +7,16 @@ This application supports the following algorithms:
 
 **Dijkstra's Algorithm**: The father of pathfinding algorithms. Guarantees the shortest path between nodes in a weighted graph. In the real world, this could represent finding shortest paths in road networks. Dijkstra's algorithm has a runtime of O(|E|+|V|log|V|). 
 
-**Greedy Best First Search**: Prioritizes exploring nodes that are closest to the endpoint based on a heuristic function. Does not guarantee the shortest path, but can be fast and efficient. 
+**Greedy Best First Search**: Prioritizes exploring weighted nodes that are closest to the endpoint based on a heuristic function. Does not guarantee the shortest path, but can be fast and efficient. 
 
-**Breadth First Search**: 
+**Breadth First Search**: Works on unweighted graphs. Guarantees shortest path and is a great algorithm, but may not be the fastest algorithm for large graphs.
+
+**Bellman-Ford Algorithm**: Unlike Dijkstra's, works with graphs that have negative weights. Utilizes dynamic programming and guarantees shortest-path. 
+
+
+## Built With:
+
+* HTML
+* CSS
+* JavaScript
+* ReactJS
