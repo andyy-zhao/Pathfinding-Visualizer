@@ -14,7 +14,7 @@ This application supports the following algorithms:
 **Bellman-Ford Algorithm**: Unlike Dijkstra's, works with graphs that have negative weights. Utilizes dynamic programming and guarantees shortest-path. 
 
 
-## Built With:
+## Technologies Used:
 
 * HTML
 * CSS
